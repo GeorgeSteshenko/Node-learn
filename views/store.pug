@@ -1,0 +1,47 @@
+extends layout
+
+include mixins/_reviewForm
+include mixins/_review
+
+block content
+    .single
+        .single__hero
+            img.single__image(src=`/uploads/${store.photo || "store.png"}`)
+            h2.title.title--single
+                a(href=`/stores/${store.slug}`) #{store.name}
+
+    .single__details.inner
+        img.single__map(src=h.staticMap(store.location.coordinates))
+        p.single__location= store.location.address
+        p= store.description
+        
+        if store.tags
+            ul.tags
+                each tag in store.tags
+                    li.tag
+                        a.tag__link(href=`/tags/${tag}`)
+                            span.tag__text #{tag}
+
+        - const reviewAuthorsId = store.reviews.map(r => r.author._id.toString())
+
+        if !user 
+            .flash.flash--info
+                .flash__text
+                    p You have to be #[a(href="/login") logged in] to leave a review!
+                <button class="flash__remove" onclick="this.parentElement.remove()">×</button>
+        else if reviewAuthorsId.includes(user._id.toString())
+            .flash.flash--info
+                .flash__text
+                    p ⚠️ You have already left your review!
+                <button class="flash__remove" onclick="this.parentElement.remove()">×</button>
+        else
+            +reviewForm(store)
+
+        //- if user
+        //-     +reviewForm(store)
+
+        if store.reviews
+            .reviews
+                each review in store.reviews
+                    .review
+                        +review(review, user)

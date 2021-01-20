@@ -1,0 +1,23 @@
+mixin review(review, user)
+    .review__header
+        .review__author
+            img.avatar(src=review.author.gravatar)
+            p= review.author.name
+        .review__stars(title=`Rated ${review.rating} out of 5 stars`)
+            = `★`.repeat(review.rating)
+            = `☆`.repeat(5 - review.rating)
+        time.review__time(datetime=review.created)= h.moment(review.created).fromNow()
+        if user && review.author._id.equals(user._id)
+            div 
+                .review__action.review__action--edit
+                    a(href=`/reviews/${review._id}/edit`) 
+                        != h.icon("pencil")
+                .review__action.review__action--delete
+                    form.delete(method="POST" action=`/reviews/${review._id}/delete`)
+                        button.heart__button(type="submit" name="delete")
+                            != h.icon("bin")                    
+            
+    .review__body
+        //- pre= h.dump(review)
+        //- pre= h.dump(user)
+        p= review.text
